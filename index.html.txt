@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laporan Pemantauan Banjir PKOD</title>
+
+<style>
+body { font-family: Arial; background:#eef3f9; padding:15px; }
+.container { max-width:600px; margin:auto; background:white; padding:15px; border-radius:10px; }
+input, select, textarea { width:100%; padding:8px; margin:5px 0; }
+button { width:100%; padding:10px; margin-top:10px; }
+#output { white-space:pre-line; background:#f4f6fb; padding:10px; margin-top:15px; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h3>Laporan Pemantauan Banjir PKOD Kinta</h3>
+
+<input id="tarikh" readonly>
+
+<select id="parlimen" onchange="updateDun()">
+<option value="">Pilih Parlimen</option>
+<option value="P063 Tambun">P063 Tambun</option>
+<option value="P064 Ipoh Timur">P064 Ipoh Timur</option>
+<option value="P065 Ipoh Barat">P065 Ipoh Barat</option>
+<option value="P068 Gopeng">P068 Gopeng</option>
+</select>
+
+<select id="dun" onchange="updateMukim()">
+<option value="">Pilih DUN</option>
+</select>
+
+<select id="mukim">
+<option value="">Pilih Mukim</option>
+</select>
+
+<label>Lokasi Pemantauan</label>
+<input id="lokasi1">
+<input id="lokasi2">
+<input id="lokasi3">
+
+<select id="jalan">
+<option value="ADA">Jalan Dinaiki Air / Terputus - ADA</option>
+<option value="TIDAK">Jalan Dinaiki Air / Terputus - TIDAK</option>
+</select>
+
+<h4>Kekuatan</h4>
+<input id="pegawai" type="number" placeholder="Bil Pegawai">
+<input id="anggota" type="number" placeholder="Bil Anggota">
+<input id="kenderaan" placeholder="Kenderaan">
+
+<h4>Catatan</h4>
+
+<select id="air">
+<option value="ADA">Kawasan dinaiki air - ADA</option>
+<option value="TIDAK">Kawasan dinaiki air - TIDAK</option>
+</select>
+
+<select id="trend">
+<option value="Menaik">Air Menaik</option>
+<option value="Surut">Air Surut</option>
+</select>
+
+<select id="cuaca">
+<option>Cerah</option>
+<option>Mendung</option>
+<option>Angin Kencang</option>
+<option>Hujan Renyai</option>
+<option>Hujan Lebat</option>
+</select>
+
+<button onclick="generate()">Generate</button>
+<button onclick="copy()">Copy</button>
+<button onclick="whatsapp()">WhatsApp</button>
+
+<div id="output"></div>
+
+</div>
+
+<script>
+
+// AUTO TARIKH + HARI
+const hari = ["AHAD","ISNIN","SELASA","RABU","KHAMIS","JUMAAT","SABTU"];
+let now = new Date();
+let tarikh = now.toLocaleDateString('en-GB');
+let masa = now.toTimeString().slice(0,5);
+let hariIni = hari[now.getDay()];
+
+document.getElementById("tarikh").value = `${tarikh}@${masa}H / ${hariIni}`;
+
+// DATA KINTA (BASIC - BOLEH UPGRADE LAGI)
+const data = {
+  "P063 Tambun": {
+    "Hulu Kinta": ["Ulu Kinta", "Tanjung Rambutan"],
+    "Manjoi": ["Manjoi"]
+  },
+  "P068 Gopeng": {
+    "Teja": ["Teja", "Kota Baharu"],
+    "Sungai Raya": ["Sungai Raya"]
+  }
+};
+
+function updateDun(){
+  let p = document.getElementById("parlimen").value;
+  let dun = document.getElementById("dun");
+  dun.innerHTML = "<option>Pilih DUN</option>";
+
+  for(let d in data[p]){
+    dun.innerHTML += `<option>${d}</option>`;
+  }
+}
+
+function updateMukim(){
+  let p = document.getElementById("parlimen").value;
+  let d = document.getElementById("dun").value;
+  let mukim = document.getElementById("mukim");
+  mukim.innerHTML = "<option>Pilih Mukim</option>";
+
+  data[p][d].forEach(m=>{
+    mukim.innerHTML += `<option>${m}</option>`;
+  });
+}
+
+function val(id){ return document.getElementById(id).value; }
+
+// GENERATE REPORT
+function generate(){
+
+let peg = val("pegawai") || 0;
+let ang = val("anggota") || 0;
+
+let report = `Assalamualaikum dan Salam Sejahtera YB Dato’ Sri / Dato’ / Datuk / Tuan / Puan,
+
+*LAPORAN PEMANTAUAN KAWASAN BERISIKO BANJIR DAERAH KINTA*
+
+${val("tarikh")}
+
+Parlimen: ${val("parlimen")}
+Dun: ${val("dun")}
+Mukim: ${val("mukim")}
+
+
+2. Kawasan/Lokasi Pemantauan:
+a. ${val("lokasi1")}
+b. ${val("lokasi2")}
+c. ${val("lokasi3")}
+
+
+3. Jalan Yang Dinaiki Air / Terputus: ${val("jalan")}
+
+
+4. Kekuatan Anggota & Logistik:
+
+APM:
+Pegawai : ${peg} x Pegawai
+Anggota : ${ang} x Anggota LLP
+Kenderaan : ${val("kenderaan")}
+
+
+Catatan:
+1. Kawasan dinaiki air: ${val("air")}
+2. Aras air: ${val("trend")}
+3. Cuaca: ${val("cuaca")}
+
+
+Sekian untuk makluman.
+
+
+Disediakan Oleh:
+Pusat Kawalan Operasi Daerah (PKOD)
+Angkatan Pertahanan Awam Malaysia
+Daerah Kinta`;
+
+document.getElementById("output").innerText = report;
+}
+
+// COPY
+function copy(){
+navigator.clipboard.writeText(document.getElementById("output").innerText);
+alert("Copied!");
+}
+
+// WHATSAPP
+function whatsapp(){
+let text = encodeURIComponent(document.getElementById("output").innerText);
+window.open("https://wa.me/?text=" + text);
+}
+
+</script>
+
+</body>
+</html>
