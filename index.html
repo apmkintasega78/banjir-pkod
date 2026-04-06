@@ -1,86 +1,3 @@
-<!DOCTYPE html>
-<html lang="ms">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Laporan Pemantauan Banjir PKOD</title>
-
-<style>
-body { font-family: Arial; background:#eef3f9; padding:15px; }
-.container { max-width:600px; margin:auto; background:white; padding:15px; border-radius:10px; }
-input, select, textarea { width:100%; padding:8px; margin:5px 0; }
-button { width:100%; padding:10px; margin-top:10px; }
-#output { white-space:pre-line; background:#f4f6fb; padding:10px; margin-top:15px; }
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<h3>Laporan Pemantauan Banjir PKOD Kinta</h3>
-
-<input id="tarikh" readonly>
-
-<select id="parlimen" onchange="updateDun()">
-<option value="">Pilih Parlimen</option>
-<option value="P063 Tambun">P063 Tambun</option>
-<option value="P064 Ipoh Timur">P064 Ipoh Timur</option>
-<option value="P065 Ipoh Barat">P065 Ipoh Barat</option>
-<option value="P068 Gopeng">P068 Gopeng</option>
-</select>
-
-<select id="dun" onchange="updateMukim()">
-<option value="">Pilih DUN</option>
-</select>
-
-<select id="mukim">
-<option value="">Pilih Mukim</option>
-</select>
-
-<label>Lokasi Pemantauan</label>
-<input id="lokasi1">
-<input id="lokasi2">
-<input id="lokasi3">
-
-<select id="jalan">
-<option value="ADA">Jalan Dinaiki Air / Terputus - ADA</option>
-<option value="TIDAK">Jalan Dinaiki Air / Terputus - TIDAK</option>
-</select>
-
-<h4>Kekuatan</h4>
-<input id="pegawai" type="number" placeholder="Bil Pegawai">
-<input id="anggota" type="number" placeholder="Bil Anggota">
-<input id="kenderaan" placeholder="Kenderaan">
-
-<h4>Catatan</h4>
-
-<select id="air">
-<option value="ADA">Kawasan dinaiki air - ADA</option>
-<option value="TIDAK">Kawasan dinaiki air - TIDAK</option>
-</select>
-
-<select id="trend">
-<option value="Menaik">Air Menaik</option>
-<option value="Surut">Air Surut</option>
-</select>
-
-<select id="cuaca">
-<option>Cerah</option>
-<option>Mendung</option>
-<option>Angin Kencang</option>
-<option>Hujan Renyai</option>
-<option>Hujan Lebat</option>
-</select>
-
-<button onclick="generate()">Generate</button>
-<button onclick="copy()">Copy</button>
-<button onclick="whatsapp()">WhatsApp</button>
-
-<div id="output"></div>
-
-</div>
-
 <script>
 
 // AUTO TARIKH + HARI
@@ -89,43 +6,104 @@ let now = new Date();
 let tarikh = now.toLocaleDateString('en-GB');
 let masa = now.toTimeString().slice(0,5);
 let hariIni = hari[now.getDay()];
-
 document.getElementById("tarikh").value = `${tarikh}@${masa}H / ${hariIni}`;
 
-// DATA KINTA (BASIC - BOLEH UPGRADE LAGI)
+
+// 🔥 FULL DATA KINTA (UPGRADE)
 const data = {
+
   "P063 Tambun": {
-    "Hulu Kinta": ["Ulu Kinta", "Tanjung Rambutan"],
-    "Manjoi": ["Manjoi"]
+    "Hulu Kinta": [
+      "Ulu Kinta",
+      "Tanjung Rambutan",
+      "Chemor",
+      "Kanthan",
+      "Meru"
+    ],
+    "Manjoi": [
+      "Manjoi",
+      "Kampung Sungai Tapah"
+    ]
   },
+
+  "P064 Ipoh Timur": {
+    "Canning": [
+      "Canning",
+      "Taman Canning",
+      "Greentown"
+    ],
+    "Tebing Tinggi": [
+      "Tebing Tinggi",
+      "Pasir Pinji",
+      "Buntong"
+    ]
+  },
+
+  "P065 Ipoh Barat": {
+    "Bercham": [
+      "Bercham",
+      "Taman Ipoh",
+      "Taman Cempaka"
+    ],
+    "Buntong": [
+      "Buntong",
+      "Jelapang",
+      "Falcon"
+    ]
+  },
+
   "P068 Gopeng": {
-    "Teja": ["Teja", "Kota Baharu"],
-    "Sungai Raya": ["Sungai Raya"]
+    "Teja": [
+      "Teja",
+      "Kota Baharu",
+      "Malim Nawar"
+    ],
+    "Sungai Raya": [
+      "Sungai Raya",
+      "Rapat Setia",
+      "Rapat Jaya"
+    ]
   }
+
 };
 
+
+// 🔽 UPDATE DUN
 function updateDun(){
   let p = document.getElementById("parlimen").value;
   let dun = document.getElementById("dun");
-  dun.innerHTML = "<option>Pilih DUN</option>";
+  let mukim = document.getElementById("mukim");
 
-  for(let d in data[p]){
-    dun.innerHTML += `<option>${d}</option>`;
-  }
+  dun.innerHTML = "<option value=''>Pilih DUN</option>";
+  mukim.innerHTML = "<option value=''>Pilih Mukim</option>";
+
+  if(!data[p]) return;
+
+  Object.keys(data[p]).forEach(d=>{
+    dun.innerHTML += `<option value="${d}">${d}</option>`;
+  });
 }
 
+
+// 🔽 UPDATE MUKIM
 function updateMukim(){
   let p = document.getElementById("parlimen").value;
   let d = document.getElementById("dun").value;
   let mukim = document.getElementById("mukim");
-  mukim.innerHTML = "<option>Pilih Mukim</option>";
+
+  mukim.innerHTML = "<option value=''>Pilih Mukim</option>";
+
+  if(!data[p] || !data[p][d]) return;
 
   data[p][d].forEach(m=>{
-    mukim.innerHTML += `<option>${m}</option>`;
+    mukim.innerHTML += `<option value="${m}">${m}</option>`;
   });
 }
 
+
+// HELPER
 function val(id){ return document.getElementById(id).value; }
+
 
 // GENERATE REPORT
 function generate(){
@@ -178,11 +156,13 @@ Daerah Kinta`;
 document.getElementById("output").innerText = report;
 }
 
+
 // COPY
 function copy(){
 navigator.clipboard.writeText(document.getElementById("output").innerText);
 alert("Copied!");
 }
+
 
 // WHATSAPP
 function whatsapp(){
@@ -191,6 +171,3 @@ window.open("https://wa.me/?text=" + text);
 }
 
 </script>
-
-</body>
-</html>
