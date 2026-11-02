@@ -1,173 +1,311 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#14532d">
+<title>Laporan Pemantauan Kawasan Berisiko Banjir Daerah Kinta</title>
+<style>
+:root{--green:#14532d;--green2:#166534;--light:#f0fdf4;--border:#d1d5db;--text:#17202a}
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:#eef2f3;color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.5}
+.container{max-width:850px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 3px 18px #00000012;overflow:hidden}
+header{background:var(--green);color:#fff;padding:22px 20px;text-align:center}
+header .small{font-size:13px;letter-spacing:.3px}
+header h1{font-size:21px;line-height:1.3;margin:8px 0 0}
+main{padding:20px}
+.notice{background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:11px 13px;font-size:13px;margin-bottom:18px}
+h2{font-size:17px;color:var(--green);border-bottom:1px solid #e5e7eb;padding-bottom:7px;margin:22px 0 13px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.field{min-width:0}
+.field.full{grid-column:1/-1}
+label{display:block;font-weight:700;font-size:14px;margin:0 0 5px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#111827;font:inherit;font-size:15px}
+input[readonly]{background:#f3f4f6}
+textarea{min-height:82px;resize:vertical}
+.help{font-size:12px;color:#64748b;margin-top:4px}
+.location-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:10px}
+a.maplink{display:inline-block;padding:10px 12px;border-radius:8px;background:#e0f2fe;color:#075985;text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap}
+.radio-line{display:flex;flex-wrap:wrap;gap:16px;padding:8px 0}
+.radio-line label{font-weight:400;margin:0;display:flex;align-items:center;gap:6px}
+.radio-line input{width:auto}
+.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:20px}
+button{border:0;border-radius:8px;padding:12px 14px;font-size:15px;font-weight:700;cursor:pointer}
+.primary{background:var(--green2);color:#fff}
+.secondary{background:#e5e7eb;color:#111827}
+.whatsapp{background:#16a34a;color:#fff}
+.output-wrap{margin-top:20px}
+#output{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:14px;min-height:120px;font-family:Arial,sans-serif;font-size:14px;overflow-wrap:anywhere}
+footer{text-align:center;color:#64748b;font-size:12px;padding:16px;border-top:1px solid #e5e7eb}
+@media(max-width:600px){body{padding:0;background:#fff}.container{border-radius:0;box-shadow:none}main{padding:15px}header{padding:19px 14px}header h1{font-size:19px}.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.actions{grid-template-columns:1fr}.location-row{grid-template-columns:1fr auto}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="small">ANGKATAN PERTAHANAN AWAM MALAYSIA</div>
+  <h1>LAPORAN PEMANTAUAN KAWASAN BERISIKO BANJIR DAERAH KINTA</h1>
+</header>
+<main>
+  <div class="notice">Sila lengkapkan maklumat pemantauan. Tarikh dan masa dijana secara automatik mengikut waktu peranti.</div>
+
+  <h2>1. Maklumat Pemantauan</h2>
+  <div class="grid">
+    <div class="field full">
+      <label for="tarikh">Tarikh / Masa / Hari</label>
+      <input id="tarikh" readonly>
+    </div>
+    <div class="field">
+      <label for="shift">Shift</label>
+      <select id="shift">
+        <option value="">Pilih Shift</option><option>ALFA</option><option>BRAVO</option><option>CHARLIE</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="status">Status Bencana</label>
+      <select id="status">
+        <option value="">Pilih Status</option>
+        <option>Tiada bencana</option>
+        <option>Pemantauan / bersiap siaga</option>
+        <option>Banjir berlaku</option>
+        <option>Jalan dinaiki air</option>
+        <option>Jalan terputus</option>
+        <option>Lain-lain</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="parlimen">Parlimen</label>
+      <select id="parlimen" onchange="updateDun()">
+        <option value="">Pilih Parlimen</option>
+        <option>P063 Tambun</option>
+        <option>P064 Ipoh Timur</option>
+        <option>P065 Ipoh Barat</option>
+        <option>P068 Gopeng</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="dun">DUN</label>
+      <select id="dun" onchange="updateMukim()"><option value="">Pilih DUN</option></select>
+    </div>
+    <div class="field full">
+      <label for="mukim">Mukim / Kawasan</label>
+      <select id="mukim"><option value="">Pilih Mukim</option></select>
+      <div class="help">Senarai berdasarkan pemetaan yang tersedia dalam sistem. Sila semak ketepatan kawasan sebelum menghantar laporan.</div>
+    </div>
+  </div>
+
+  <h2>2. Kawasan / Lokasi Pemantauan</h2>
+  <div class="field">
+    <label for="lokasi1">a. Lokasi 1</label>
+    <div class="location-row"><input id="lokasi1" placeholder="Masukkan nama lokasi / alamat"><a class="maplink" id="map1" href="https://earth.google.com/web/" target="_blank" rel="noopener">Google Earth</a></div>
+    <label for="lokasi2">b. Lokasi 2</label>
+    <div class="location-row"><input id="lokasi2" placeholder="Masukkan nama lokasi / alamat"><a class="maplink" id="map2" href="https://earth.google.com/web/" target="_blank" rel="noopener">Google Earth</a></div>
+    <label for="lokasi3">c. Lokasi 3</label>
+    <div class="location-row"><input id="lokasi3" placeholder="Masukkan nama lokasi / alamat"><a class="maplink" id="map3" href="https://earth.google.com/web/" target="_blank" rel="noopener">Google Earth</a></div>
+    <div class="help">Pautan Google Earth akan mencari lokasi berdasarkan teks yang dimasukkan.</div>
+  </div>
+
+  <h2>3. Keadaan Jalan</h2>
+  <div class="field">
+    <label>Jalan Yang Dinaiki Air / Terputus</label>
+    <div class="radio-line">
+      <label><input type="radio" name="jalan" value="ADA"> ADA</label>
+      <label><input type="radio" name="jalan" value="TIADA" checked> TIADA</label>
+    </div>
+    <label for="butiranJalan">Butiran jalan / lokasi (jika ada)</label>
+    <textarea id="butiranJalan" placeholder="Nyatakan nama jalan, tahap laluan atau keadaan semasa"></textarea>
+  </div>
+
+  <h2>4. Kekuatan Anggota & Logistik</h2>
+  <div class="grid">
+    <div class="field">
+      <label for="pegawai">Pegawai</label>
+      <input id="pegawai" type="number" min="0" inputmode="numeric" placeholder="Bilangan pegawai">
+    </div>
+    <div class="field">
+      <label for="anggota">Anggota LLP</label>
+      <input id="anggota" type="number" min="0" inputmode="numeric" placeholder="Bilangan anggota">
+    </div>
+    <div class="field full">
+      <label for="kenderaan">Kenderaan / Logistik</label>
+      <textarea id="kenderaan" placeholder="Contoh: 1 x Ambulans, 1 x Hilux"></textarea>
+    </div>
+  </div>
+
+  <h2>5. Catatan Pemantauan</h2>
+  <div class="grid">
+    <div class="field">
+      <label for="air">Kawasan Dinaiki Air</label>
+      <select id="air"><option value="">Pilih</option><option>ADA</option><option>TIADA</option></select>
+    </div>
+    <div class="field">
+      <label for="trend">Aras Air</label>
+      <select id="trend"><option value="">Pilih</option><option>Meningkat</option><option>Menurun</option><option>Stabil</option><option>Tiada air</option></select>
+    </div>
+    <div class="field full">
+      <label for="cuaca">Cuaca</label>
+      <select id="cuaca"><option value="">Pilih</option><option>Cerah</option><option>Mendung</option><option>Hujan renyai</option><option>Hujan sederhana</option><option>Hujan lebat</option></select>
+    </div>
+    <div class="field full">
+      <label for="catatan">Catatan Tambahan</label>
+      <textarea id="catatan" placeholder="Maklumat tambahan / tindakan susulan"></textarea>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" type="button" onclick="generate()">Jana Laporan</button>
+    <button class="secondary" type="button" onclick="copyReport()">Salin Laporan</button>
+    <button class="secondary" type="button" onclick="saveTxt()">Simpan TXT</button>
+    <button class="whatsapp" type="button" onclick="sendWhatsApp()">WhatsApp</button>
+  </div>
+
+  <div class="output-wrap">
+    <h2>Pratonton Laporan</h2>
+    <div id="output" aria-live="polite">Laporan akan dipaparkan di sini selepas butang “Jana Laporan” ditekan.</div>
+  </div>
+</main>
+<footer>ANGKATAN PERTAHANAN AWAM MALAYSIA · DAERAH KINTA</footer>
+</div>
+
 <script>
-
-// AUTO TARIKH + HARI
-const hari = ["AHAD","ISNIN","SELASA","RABU","KHAMIS","JUMAAT","SABTU"];
-let now = new Date();
-let tarikh = now.toLocaleDateString('en-GB');
-let masa = now.toTimeString().slice(0,5);
-let hariIni = hari[now.getDay()];
-document.getElementById("tarikh").value = `${tarikh}@${masa}H / ${hariIni}`;
-
-
-// 🔥 FULL DATA KINTA (UPGRADE)
+// Pemetaan yang dikekalkan daripada data sistem asal.
+// Sila sahkan senarai kawasan dengan rujukan rasmi sebelum menambah kawasan lain.
 const data = {
-
   "P063 Tambun": {
-    "Hulu Kinta": [
-      "Ulu Kinta",
-      "Tanjung Rambutan",
-      "Chemor",
-      "Kanthan",
-      "Meru"
-    ],
-    "Manjoi": [
-      "Manjoi",
-      "Kampung Sungai Tapah"
-    ]
+    "Hulu Kinta": ["Ulu Kinta","Tanjung Rambutan","Chemor","Kanthan","Meru"],
+    "Manjoi": ["Manjoi","Kampung Sungai Tapah"]
   },
-
   "P064 Ipoh Timur": {
-    "Canning": [
-      "Canning",
-      "Taman Canning",
-      "Greentown"
-    ],
-    "Tebing Tinggi": [
-      "Tebing Tinggi",
-      "Pasir Pinji",
-      "Buntong"
-    ]
+    "Canning": ["Canning","Taman Canning","Greentown"],
+    "Tebing Tinggi": ["Tebing Tinggi","Pasir Pinji","Buntong"]
   },
-
   "P065 Ipoh Barat": {
-    "Bercham": [
-      "Bercham",
-      "Taman Ipoh",
-      "Taman Cempaka"
-    ],
-    "Buntong": [
-      "Buntong",
-      "Jelapang",
-      "Falcon"
-    ]
+    "Bercham": ["Bercham","Taman Ipoh","Taman Cempaka"],
+    "Buntong": ["Buntong","Jelapang","Falcon"]
   },
-
   "P068 Gopeng": {
-    "Teja": [
-      "Teja",
-      "Kota Baharu",
-      "Malim Nawar"
-    ],
-    "Sungai Raya": [
-      "Sungai Raya",
-      "Rapat Setia",
-      "Rapat Jaya"
-    ]
+    "Teja": ["Teja","Kota Baharu","Malim Nawar"],
+    "Sungai Raya": ["Sungai Raya","Rapat Setia","Rapat Jaya"]
   }
-
 };
 
+const hari = ["AHAD","ISNIN","SELASA","RABU","KHAMIS","JUMAAT","SABTU"];
+function updateDateTime(){
+  const now = new Date();
+  const tarikh = new Intl.DateTimeFormat("en-GB",{day:"2-digit",month:"2-digit",year:"numeric"}).format(now);
+  const masa = new Intl.DateTimeFormat("ms-MY",{hour:"2-digit",minute:"2-digit",hour12:false}).format(now);
+  document.getElementById("tarikh").value = `${tarikh} @ ${masa}H / ${hari[now.getDay()]}`;
+}
+updateDateTime();
 
-// 🔽 UPDATE DUN
 function updateDun(){
-  let p = document.getElementById("parlimen").value;
-  let dun = document.getElementById("dun");
-  let mukim = document.getElementById("mukim");
-
-  dun.innerHTML = "<option value=''>Pilih DUN</option>";
-  mukim.innerHTML = "<option value=''>Pilih Mukim</option>";
-
+  const p = document.getElementById("parlimen").value;
+  const dun = document.getElementById("dun");
+  const mukim = document.getElementById("mukim");
+  dun.innerHTML = '<option value="">Pilih DUN</option>';
+  mukim.innerHTML = '<option value="">Pilih Mukim</option>';
   if(!data[p]) return;
-
-  Object.keys(data[p]).forEach(d=>{
-    dun.innerHTML += `<option value="${d}">${d}</option>`;
+  Object.keys(data[p]).forEach(name=>{
+    const option = document.createElement("option");
+    option.value = name; option.textContent = name; dun.appendChild(option);
   });
 }
-
-
-// 🔽 UPDATE MUKIM
 function updateMukim(){
-  let p = document.getElementById("parlimen").value;
-  let d = document.getElementById("dun").value;
-  let mukim = document.getElementById("mukim");
-
-  mukim.innerHTML = "<option value=''>Pilih Mukim</option>";
-
+  const p = document.getElementById("parlimen").value;
+  const d = document.getElementById("dun").value;
+  const mukim = document.getElementById("mukim");
+  mukim.innerHTML = '<option value="">Pilih Mukim</option>';
   if(!data[p] || !data[p][d]) return;
-
-  data[p][d].forEach(m=>{
-    mukim.innerHTML += `<option value="${m}">${m}</option>`;
+  data[p][d].forEach(name=>{
+    const option = document.createElement("option");
+    option.value = name; option.textContent = name; mukim.appendChild(option);
   });
 }
+function val(id){return document.getElementById(id).value.trim();}
+function selectedRadio(name){
+  const selected = document.querySelector(`input[name="${name}"]:checked`);
+  return selected ? selected.value : "";
+}
+function updateMapLinks(){
+  [1,2,3].forEach(i=>{
+    const location = val(`lokasi${i}`);
+    const url = location ? `https://earth.google.com/web/search/${encodeURIComponent(location)}` : "https://earth.google.com/web/";
+    document.getElementById(`map${i}`).href = url;
+  });
+}
+[1,2,3].forEach(i=>document.getElementById(`lokasi${i}`).addEventListener("input",updateMapLinks));
 
-
-// HELPER
-function val(id){ return document.getElementById(id).value; }
-
-
-// GENERATE REPORT
 function generate(){
+  const lokasi = [1,2,3].map(i=>val(`lokasi${i}`)).filter(Boolean);
+  const report = `Assalamualaikum dan Salam Sejahtera YB Dato’ Sri / Dato’ / Datuk / Tuan / Puan,
 
-let peg = val("pegawai") || 0;
-let ang = val("anggota") || 0;
-
-let report = `Assalamualaikum dan Salam Sejahtera YB Dato’ Sri / Dato’ / Datuk / Tuan / Puan,
-
-*LAPORAN PEMANTAUAN KAWASAN BERISIKO BANJIR DAERAH KINTA*
+LAPORAN PEMANTAUAN KAWASAN BERISIKO BANJIR DAERAH KINTA
 
 ${val("tarikh")}
+Shift: ${val("shift") || "-"}
+Status Bencana: ${val("status") || "-"}
 
-Parlimen: ${val("parlimen")}
-Dun: ${val("dun")}
-Mukim: ${val("mukim")}
+Parlimen: ${val("parlimen") || "-"}
+DUN: ${val("dun") || "-"}
+Mukim: ${val("mukim") || "-"}
 
+2. Kawasan / Lokasi Pemantauan:
+${lokasi.length ? lokasi.map((x,i)=>`${String.fromCharCode(97+i)}. ${x}`).join("\n") : "a. -" }
 
-2. Kawasan/Lokasi Pemantauan:
-a. ${val("lokasi1")}
-b. ${val("lokasi2")}
-c. ${val("lokasi3")}
-
-
-3. Jalan Yang Dinaiki Air / Terputus: ${val("jalan")}
-
+3. Jalan Yang Dinaiki Air / Terputus: ${selectedRadio("jalan")}
+Butiran: ${val("butiranJalan") || "-"}
 
 4. Kekuatan Anggota & Logistik:
 
 APM:
-Pegawai : ${peg} x Pegawai
-Anggota : ${ang} x Anggota LLP
-Kenderaan : ${val("kenderaan")}
-
+Pegawai: ${val("pegawai") || "0"} x Pegawai
+Anggota: ${val("anggota") || "0"} x Anggota LLP
+Kenderaan / Logistik: ${val("kenderaan") || "-"}
 
 Catatan:
-1. Kawasan dinaiki air: ${val("air")}
-2. Aras air: ${val("trend")}
-3. Cuaca: ${val("cuaca")}
-
+1. Kawasan dinaiki air: ${val("air") || "-"}
+2. Aras air: ${val("trend") || "-"}
+3. Cuaca: ${val("cuaca") || "-"}
+4. Catatan tambahan: ${val("catatan") || "-"}
 
 Sekian untuk makluman.
-
 
 Disediakan Oleh:
 Pusat Kawalan Operasi Daerah (PKOD)
 Angkatan Pertahanan Awam Malaysia
 Daerah Kinta`;
-
-document.getElementById("output").innerText = report;
+  document.getElementById("output").textContent = report;
+  updateMapLinks();
 }
-
-
-// COPY
-function copy(){
-navigator.clipboard.writeText(document.getElementById("output").innerText);
-alert("Copied!");
+function ensureReport(){
+  const output = document.getElementById("output");
+  if(output.textContent.startsWith("Laporan akan dipaparkan")) generate();
+  return output.textContent;
 }
-
-
-// WHATSAPP
-function whatsapp(){
-let text = encodeURIComponent(document.getElementById("output").innerText);
-window.open("https://wa.me/?text=" + text);
+async function copyReport(){
+  const text = ensureReport();
+  try{
+    await navigator.clipboard.writeText(text);
+    alert("Laporan berjaya disalin.");
+  }catch(e){
+    const area = document.createElement("textarea");
+    area.value = text; document.body.appendChild(area); area.select();
+    document.execCommand("copy"); area.remove();
+    alert("Laporan disalin.");
+  }
 }
-
+function saveTxt(){
+  const text = ensureReport();
+  const blob = new Blob([text],{type:"text/plain;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "Laporan_Pemantauan_Banjir_Kinta.txt";
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+function sendWhatsApp(){
+  const text = encodeURIComponent(ensureReport());
+  window.open("https://wa.me/?text="+text,"_blank","noopener");
+}
 </script>
+</body>
+</html>
